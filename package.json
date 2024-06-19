@@ -29,12 +29,12 @@
     "web-did-resolver": "^2.0.27"
   },
   "devDependencies": {
-    "@credo-ts/anoncreds": "*",
-    "@credo-ts/askar": "*",
+    "@credo-ts/anoncreds": "^0.5.3",
+    "@credo-ts/askar": "^0.5.3",
     "@credo-ts/cheqd": "*",
     "@credo-ts/core": "file:credo-ts-core-0.5.3.tgz",
-    "@credo-ts/indy-vdr": "*",
-    "@credo-ts/node": "*",
+    "@credo-ts/indy-vdr": "^0.5.3",
+    "@credo-ts/node": "^0.5.3",
     "@types/figlet": "^1.5.4",
     "@types/inquirer": "^8.2.6",
     "clear": "^0.1.0",

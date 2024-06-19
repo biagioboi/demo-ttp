@@ -55,7 +55,6 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
         },
         endpoints: [endPoint],
         autoUpdateStorageOnStartup: true,
-        logger: new ConsoleLogger(LogLevel.debug)
     }
 
     // A new instance of an agent is created here
@@ -66,18 +65,17 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
     })
 
     // Register a simple `WebSocket` outbound transport - not needed
-    agent.registerOutboundTransport(new WsOutboundTransport())
+    //agent.registerOutboundTransport(new WsOutboundTransport())
 
     // Register a simple `Http` outbound transport
     agent.registerOutboundTransport(new HttpOutboundTransport())
 
     // Register a simple `Http` inbound transport
-    agent.registerInboundTransport(new HttpInboundTransport({port: 3010}))
-
+    agent.registerInboundTransport(new HttpInboundTransport({port: 3070}))
 
     // Initialize the agent
     await agent.initialize()
-    let new_test = "Somethingreallylongthatrepresentmyresource";
+    /*let new_test = "Somethingreallylongthatrepresentmyresource";
     let agent_context = agent.context;
 
     let recipientKey = Key.fromPublicKeyBase58("78YNF4h8dfpkFNS6ohumHAt2oD9UL3c5P5JQX35qfMDJ", KeyType.Ed25519)
@@ -86,10 +84,10 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
     let env_service = new EnvelopeService(new ConsoleLogger());
 
     let dec_message = await env_service.unpackMessage(agent.context, enc_message);
-    console.log(JSON.stringify(dec_message));
+    console.log(JSON.stringify(dec_message));*/
 
 
-    this.did = 'did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main'
+    let did = 'did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main'
     try {
         // Try to create the key for the wallet, if it already exists then jump these instructions
         const ed25519Key = await agent.wallet.createKey({
@@ -165,7 +163,7 @@ const vc_1 = require("@credo-ts/core/build/modules/vc");
 const {W3cJsonLdCredentialService} = require("@credo-ts/core/build/modules/vc/data-integrity/W3cJsonLdCredentialService");
 
 const app = express();
-const PORT = 8080;
+const PORT = 8082;
 startEverything().then(result => {
     /* Empty */
 })
