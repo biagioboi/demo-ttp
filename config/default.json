@@ -1,0 +1,9 @@
+{
+  "wallet": {
+    "id": "SecureTTP",
+    "key": "solidttp123000000000000000000101",
+    "seed_private_key": "solidttp123000000000000000000101",
+    "endpoint": "http://localhost:3070",
+    "ledger_url": "http://test.bcovrin.vonx.io/genesis"
+  }
+}
