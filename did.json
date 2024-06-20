@@ -21,9 +21,7 @@
       "recipientKeys": [
         "did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main#z6MkjZpNhB8hcTSAVKiPPA8h7VYtiT43TUTAc87N872iw9rh"
       ],
-      "routingKeys": [
-        "did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main#z6MkjZpNhB8hcTSAVKiPPA8h7VYtiT43TUTAc87N872iw9rh"
-      ]
+      "routingKeys": []
     }
   ],
   "authentication": [

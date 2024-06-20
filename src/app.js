@@ -37,12 +37,18 @@ const {AskarModule} = require('@credo-ts/askar')
 const {anoncreds} = require('@hyperledger/anoncreds-nodejs')
 const {AnonCredsRsModule} = require('@credo-ts/anoncreds')
 const sys_config = require('config');
+var bodyParser = require('body-parser');
+const express = require('express');
+const {randomUUID} = require("crypto");
+const {EnvelopeService} = require("@credo-ts/core/build/agent/EnvelopeService");
 
 const prompt = require('prompt-sync')();
 const getGenesisTransaction = async (url) => {
     const response = await fetch(url)
     return await response.text()
 }
+
+let agent;
 const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
 
     const genesisTransactionsBCovrinTestNet = await getGenesisTransaction(ledgerUrl)
@@ -55,13 +61,14 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
         },
         endpoints: [endPoint],
         autoUpdateStorageOnStartup: true,
+        logger: new ConsoleLogger(LogLevel.debug)
     }
 
     // A new instance of an agent is created here
-    const agent = new Agent({
+    agent = new Agent({
         config,
         dependencies: agentDependencies,
-        modules: getAskarAnonCredsIndyModules(genesisTransactionsBCovrinTestNet)
+        modules: getAskarAnonCredsIndyModules(genesisTransactionsBCovrinTestNet),
     })
 
     // Register a simple `WebSocket` outbound transport - not needed
@@ -75,16 +82,6 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
 
     // Initialize the agent
     await agent.initialize()
-    /*let new_test = "Somethingreallylongthatrepresentmyresource";
-    let agent_context = agent.context;
-
-    let recipientKey = Key.fromPublicKeyBase58("78YNF4h8dfpkFNS6ohumHAt2oD9UL3c5P5JQX35qfMDJ", KeyType.Ed25519)
-
-    let enc_message = {"protected":"eyJlbmMiOiJ4Y2hhY2hhMjBwb2x5MTMwNV9pZXRmIiwidHlwIjoiSldNLzEuMCIsImFsZyI6IkFub25jcnlwdCIsInJlY2lwaWVudHMiOlt7ImVuY3J5cHRlZF9rZXkiOiJlcjNuVXhHR2xCY0ZYZWE3Ny1aclFJSkdHaXdoY3hoSHZSSmhyZGp1emhIdzhmdlpoWVRRdkIwVG5DcGRQQXJDYXF3Rk9RYXJxdU0zN2RtblZ0NjJPT0c0Z1NqUHlVejZ2U1lOTkZTdUdTZyIsImhlYWRlciI6eyJraWQiOiI3OFlORjRoOGRmcGtGTlM2b2h1bUhBdDJvRDlVTDNjNVA1SlFYMzVxZk1ESiJ9fV19","ciphertext":"zaOSA-7evXCzX-lH7s6rlhQ6xrQnkzoKjN5tOTLgqeRbSfci57fL2-B0dZ3b4JYj5uXV1QBxE0MGampwikywtiC4qR9y2ylz_Lq6wlv3prjavAdFV4iG7V46FJcgPIRqKSLE-QfiMdSi_jB0bAQ1HBIkqGd6B0Klqq5aF930L2BlAgsi5RCapFQDaswM6ZgjT0jdta9CFkpJVDV1qjxX0vuXkjf-_2IQ7tGDJV4DfeMu8dMmrvQkZ65foriGJMMh","iv":"bOzw4686FA7vOadV","tag":"OBRnwfMiG7on6VwVP-wcWg"}
-    let env_service = new EnvelopeService(new ConsoleLogger());
-
-    let dec_message = await env_service.unpackMessage(agent.context, enc_message);
-    console.log(JSON.stringify(dec_message));*/
 
 
     let did = 'did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main'
@@ -138,7 +135,7 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
             }
         })
         let created_dids = await agent.dids.getCreatedDids({method: 'web'});
-        console.log("This is the App Wallet, it has this DID: " + created_dids[0].did);
+        console.log("This is the TTP Wallet, it has this DID: " + created_dids[0].did);
 
     }
 
@@ -146,21 +143,9 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
     return agent
 }
 
-let agent
-
 async function startEverything() {
     agent = await initializeIssuerAgent(sys_config.get('wallet.ledger_url'), sys_config.get('wallet.endpoint'));
-    //await activateListener(agent, false, true)
 }
-
-const express = require('express');
-const {randomUUID} = require("crypto");
-const domain = require("domain");
-const {W3cIssuerOptions} = require("@credo-ts/core/build/modules/vc/models/credential/W3cIssuer");
-const {SingleOrArray} = require("@credo-ts/core/build/utils");
-const {JsonObject} = require("@credo-ts/core/build/types");
-const vc_1 = require("@credo-ts/core/build/modules/vc");
-const {W3cJsonLdCredentialService} = require("@credo-ts/core/build/modules/vc/data-integrity/W3cJsonLdCredentialService");
 
 const app = express();
 const PORT = 8082;
@@ -168,193 +153,52 @@ startEverything().then(result => {
     /* Empty */
 })
 app.use(express.static('public'))
-var bodyParser = require('body-parser');
-const OutOfBandEvents_1 = require("@credo-ts/core/build/modules/oob/domain/OutOfBandEvents");
-const {EnvelopeService} = require("@credo-ts/core/build/agent/EnvelopeService");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.get('/', (req, res) => {
     res.status(200);
-    //let url = `/index.html?user=${user}&application=${application}&vcissuer=${vcissuer}&nonce=${encodeURIComponent(nonce)}&domain=${domain}&redirect_uri=${redirect_uri}&code=${encodeURIComponent(code)}`;
-    let url = 'index.html'
-    res.redirect(url);
+    res.send("TTP Running.")
 });
 
 app.get('/generateInvitation', async (req, res) => {
     res.status(200);
-    let med = await agent.mediationRecipient.getRouting();
-
     const outOfBandRecord = await agent.oob.createInvitation({
         autoAcceptConnection: true,
         handshake: true,
-        invitationDid: "did:web:secureapp.solidcommunity.net:public",
+        invitationDid: "did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main",
     })
-
-    //const outOfBandRecord = await agent.oob.createInvitation();
-
-    //console.log(JSON.stringify(outOfBandRecord, undefined, 2));
-    //let url_invitation = prompt("Insert the invitation URL to begin a communication: ")
-    //await setuplistener(agent);
-    //await agent.oob.receiveInvitationFromUrl(url_invitation, {
-    //    handshake: true,
-
-    //    ourDid: 'did:web:secureapp.solidcommunity.net:public'
-    //})
-    //await agent.oob.receiveInvitationFromUrl(url_invitation)
-    // Dovremmo creare un DIDDocument per il nuovo did, per evitare di fare questo allora si fa uso di did:peer che incorpora tutto.
-
-    const invitationUrl = outOfBandRecord.outOfBandInvitation.toUrl({domain: sys_config.get('wallet.endpoint')})
-    let qrcode_png
-    await QRCode.toDataURL(invitationUrl, {version: 22}).then(qrcode_generated => {
-        qrcode_png = qrcode_generated
-    })
-    res.json({url: invitationUrl, connectionId: outOfBandRecord.id, qrcode: qrcode_png})
-});
-
-async function ourListener(payload, req, res) {
-
-    if (payload.connectionRecord.state === DidExchangeState.Completed) {
-        console.log(JSON.stringify(payload));
-        //console.log(await agent.connections.rotate({connectionId: payload.connectionRecord.id}));
-        await agent.basicMessages.sendMessage(payload.connectionRecord.id, "Hello, we can start to communicate")
-        /* Start by sending a proof request, if we want to assess the identity */
-        /* todo: get my_did from created did */
-        let my_did = "did:key:z6Mkw4VsQTL36g5t4AA27M38ZgpEJE6ESas468vhZNhZJqjA";
-        /* TODO: Insert a field in the VPR that identify the application, by modifying PEX library */
-
-        /* MAYBE_TODO: By now we have a list of authorized did from the holder, but in the future implementation we may have a protocol for exchanging app DID and add new dids to the list */
-
-        /* Check if the request contains a proof field, if yes we have to create a wrapper rather than the simple request */
-
-        /* We have to improve here, it is possible that we only sign the request, as well as only the ACP Context, as well as wrap it*/
-        if (req.body.vpr === undefined) {
-            const proof_request = await agent.proofs.requestProof({
-                protocolVersion: 'v2',
-                connectionId: payload.connectionRecord.id,
-                proofFormats: {
-                    presentationExchange: {
-                        type: ["VerifiablePresentationRequest"],
-                        '@context': ["https://bboi.solidcommunity.net/public/schemas/2024/presexchange.jsonld"],
-                        presentationDefinition: {
-                            "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                            "input_descriptors": JSON.parse(req.body.input_descriptors),
-                            "format": { // Which format we want for the signature? Currently, we are using ldp_vp
-                                "ldp_vc": {
-                                    "proof_type": [
-                                        "JsonWebSignature2020",
-                                        "Ed25519Signature2018",
-                                    ]
-                                },
-                                "ldp_vp": {
-                                    "proof_type": ["Ed25519Signature2018"]
-                                },
-                            },
-                            "requestACP": {
-                                "type": ["ACPContext"],
-                                "target": req.body.target,
-                                "agent": req.body.agent,
-                                "creator": req.body.creator,
-                                "owner": req.body.owner,
-                                "client": req.body.client,
-                                "issuer": req.body.issuer
-                            }
-                        },
-                        options: {
-                            challenge: req.body.challenge,
-                            domain: req.body.domain,
-                        },
-                        signPresentationRequest: true,
-                    }
-
-                }
-            });
-        } else {
-            let vpr_obj = JSON.parse(req.body.vpr)
-            let wrapperVPR = new W3cPresentationRequest(vpr_obj)
-            let wrapped_VPR = await agent.w3cCredentials.createPresentationRequestWrapper({
-                id: "https://example.com/wrappedVPR/321122",
-                vpr: wrapperVPR,
-                termsAndCondition: wrapperVPR.presentation_definition.requestACP,
-            })
-            let wrappedVPRSigned = await agent.w3cCredentials.signWrappedPresentationRequest(
-                {
-                    wrappedVPR: wrapped_VPR,
-                    proofType: 'Ed25519Signature2018',
-                    verificationMethod: 'did:web:secureapp.solidcommunity.net:public#z6Mkg4kRxcfvWfqTV86RdBKHjTks5thJe7R4xsGTs5zASrB7',
-                }
-            )
-            /* Send it to the user */
-            await agent.proofs.requestWrappedProof({
-                protocolVersion: 'v2',
-                connectionId: payload.connectionRecord.id,
-                requestWrapper: wrappedVPRSigned,
-                proofFormats: {
-                    presentationExchange: {
-                        // Empty, it is just for interop and to say that we want DifExchange
-                    }
-                }
-            })
-
-        }
-
-        /* Set up the listener for the proof requested */
-        agent.events.on(ProofEventTypes.ProofStateChanged, async ({payload}) => {
-
-            console.log(payload);
-            /* If the presentation of the credentials has been completed, we can show the credentials exchanged */
-            if (payload.proofRecord.state === ProofState.Done) {
-                if (payload.proofRecord.isVerified === true) {
-                    /* We are sure that the presentation has been signed and contains the same challenge and we can now produce a new VP containing our singature or maybe not*/
-                    let entire_vp = await agent.proofs.getFormatData(payload.proofRecord.id)
-
-                    const presentationParsed = JsonTransformer.fromJSON(entire_vp.presentation.presentationExchange, W3cJsonLdVerifiablePresentation);
-                    let wrapPresentation = true;
-                    let presentationToSend = presentationParsed
-                    if (wrapPresentation) {
-                        let wrappedVP = await agent.w3cCredentials.createPresentationWrapper({
-                            id: "https://example.com/wrappedVP/321122",
-                            vp: presentationParsed
-                        })
-                        presentationToSend = await agent.w3cCredentials.signWrappedPresentation({
-                            presentation: wrappedVP,
-                            format: ClaimFormat.LdpVp,
-                            verificationMethod: 'did:web:secureapp.solidcommunity.net:public#z6Mkg4kRxcfvWfqTV86RdBKHjTks5thJe7R4xsGTs5zASrB7',
-                            challenge: presentationParsed.proof.challenge,
-                            domain: presentationParsed.proof.domain,
-                            proofType: "Ed25519Signature2018",
-                        })
-                    }
-
-                    res.json(presentationToSend)
-                    //console.log(JSON.stringify(entire_vp.presentation))
-                    agent.events.off(ProofEventTypes.ProofStateChanged, () => {
-                    });
-                    agent.events.off(ConnectionEventTypes.ConnectionStateChanged, () => {
-                    });
-                }
-            }
-        });
-
-    }
-}
-
-app.post('/requestUserCredential', async (req, res) => {
-    res.status(200);
-
-
-    /* Is the domain what we want for the request (VPR)? */
-    /* To attach the listner only to the current connection, checks on outOfBandId field  */
-    /*agent.events.on(OutOfBandEventTypes.HandshakeReused, async ({payload}) => {
-            await agent.connections.rotate({connectionId: payload.connectionRecord.id})
-    });*/
 
     agent.events.on(ConnectionEventTypes.ConnectionStateChanged, async ({payload}) => {
-        await ourListener(payload, req, res);
+        console.log(JSON.stringify(payload));
+        if (payload.connectionRecord.state === DidExchangeState.Completed) {
+            console.log(JSON.stringify(payload));
+        }
     });
-    agent.events.on(OutOfBandEventTypes.HandshakeReused, async ({payload}) => {
-        //await ourListener(payload, req, res);
+    console.log("I'm generating a new invitation");
+    const invitationUrl = outOfBandRecord.outOfBandInvitation.toUrl({domain: sys_config.get('wallet.endpoint')})
+    res.json({url: invitationUrl, connectionId: outOfBandRecord.id})
+});
+
+app.post('/checkResource', async (req, res) => {
+    res.status(200);
+    let encMessage = req.body.encryptedMessage;
+    if (!encMessage) {
+        res.json({error: "Unable to process the request."})
+    }
+
+
+    let env_service = new EnvelopeService(new ConsoleLogger());
+    let dec_message = await env_service.unpackMessage(agent.context, encMessage);
+
+    let theConnection = await agent.connections.findByKeys(agent.context, {
+        recipientKey: dec_message.recipientKey,
+        senderKey: dec_message.senderKey
     });
+
+    await agent.basicMessages.sendMessage(theConnection.id, "I decrypted a message, I will charge you for this.")
+
+    res.json(dec_message.plaintextMessage)
 
 })
 
