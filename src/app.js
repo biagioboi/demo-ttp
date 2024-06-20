@@ -84,7 +84,7 @@ const initializeIssuerAgent = async (ledgerUrl, endPoint) => {
     await agent.initialize()
 
 
-    let did = 'did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main'
+    let did = 'did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main:src'
     try {
         // Try to create the key for the wallet, if it already exists then jump these instructions
         const ed25519Key = await agent.wallet.createKey({
@@ -166,7 +166,7 @@ app.get('/generateInvitation', async (req, res) => {
     const outOfBandRecord = await agent.oob.createInvitation({
         autoAcceptConnection: true,
         handshake: true,
-        invitationDid: "did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main",
+        invitationDid: "did:web:raw.githubusercontent.com:biagioboi:demo-ttp:main:src",
     })
 
     agent.events.on(ConnectionEventTypes.ConnectionStateChanged, async ({payload}) => {
